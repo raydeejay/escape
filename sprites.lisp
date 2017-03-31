@@ -93,7 +93,8 @@
     (let ((id (first (texture sprite)))
           (width (second (texture sprite)))
           (height (third (texture sprite))))
-      (gl:enable :texture-2d)
+      (gl:enable :texture-2d :blend)
+      (gl:blend-func :src-alpha :one-minus-src-alpha)
       (gl:bind-texture :texture-2d id)
       (gl:color 1 1 1)
       (gl:with-primitives :quads
@@ -106,10 +107,10 @@
         (gl:tex-coord 1 0)
         (gl:vertex (+ (x sprite) width) (y sprite)))
       (gl:bind-texture :texture-2d 0)
-      (gl:disable :texture-2d))))
+      (gl:disable :texture-2d :blend))))
 
 (defun draw-sprites ()
-  (loop :for sprite :in *sprites* :do
+  (loop :for sprite :in (sprites *scene*) :do
      (draw sprite)))
 
 (defun render-sprites-for-picking ()
