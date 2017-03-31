@@ -5,14 +5,14 @@
 (defclass sprite ()
   ((id       :accessor id       :initarg :id)
    (name     :accessor name     :initarg :name)
-   (x         :accessor x         :initarg :x         :initform 320)
-   (y         :accessor y         :initarg :y         :initform 200)
-   (heading   :accessor heading   :initarg :heading   :initform 90)
-   (color     :accessor color     :initarg :color     :initform (list 1 1 1))
-   (visible   :accessor visible   :initarg :visible   :initform T)
+   (x        :accessor x        :initarg :x        :initform 320)
+   (y        :accessor y        :initarg :y        :initform 200)
+   (heading  :accessor heading  :initarg :heading  :initform 90)
+   (color    :accessor color    :initarg :color    :initform (list 1 1 1))
+   (visible  :accessor visible  :initarg :visible  :initform T)
    (filename :accessor filename :initarg :filename)
    (texture  :accessor texture  :initarg :texture)
-   (on-click :accessor on-click :initarg :on-click)))
+   (on-click :accessor on-click :initarg :on-click :initform nil)))
 
 (defmethod initialize-instance :around ((sprite sprite)
                                         &rest initargs)
@@ -114,7 +114,7 @@
      (draw sprite)))
 
 (defun render-sprites-for-picking ()
-  (loop :for sprite :in *sprites*
+  (loop :for sprite :in (sprites *scene*)
      :for c :from 1 :do
      (when (visible sprite)
        ;; (let ((anchor (cons (x sprite)
