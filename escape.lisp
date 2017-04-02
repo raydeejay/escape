@@ -117,7 +117,7 @@
                                  (discard *scene* :tree))])))
 
 (defun run ()
-  ;; (when (not *vfs*) (build-vfs))
+  (when (not *vfs*) (build-vfs))
   (open-display))
 
 (defun buildapp-entry-point (args)
