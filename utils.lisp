@@ -15,3 +15,16 @@
 
 (defun to-degrees (radians)
   (/ (* radians 180.0) pi))
+
+;; macros
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro toggle (place)
+    `(setf ,place (not ,place))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro once (body)
+    `(let (fired)
+       (,@(subseq body 0 2)
+          (when (not fired)
+            (setf fired T)
+            ,@(subseq body 2))))))
