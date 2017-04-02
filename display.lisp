@@ -42,11 +42,10 @@
 
 (defun idle-func (win)
   (declare (ignore win))
-  ;; clear the display
   (gl:clear-color 0 0 0 1)
   (gl:clear :color-buffer)
-  ;; draw things
-  (draw-sprites))
+  (draw-scene)
+  (draw-inventory))
 
 
 (defun handle-keydown (keysym)
@@ -84,6 +83,7 @@
     (gl:clear :color-buffer)
     (gl:enable :scissor-test)
     (gl:scissor x (- *display-height* y) 1 1)
+
     (render-sprites-for-picking)
     (let ((c (1- (elt (gl:read-pixels x (- *display-height* y) 1 1
                                       :rgba :unsigned-byte)
@@ -93,7 +93,22 @@
           ;; action here
           (when sprite
             (when (on-click sprite)
-              (funcall (on-click sprite))))))))
+              (funcall (on-click sprite)))))))
+
+    (gl:clear-color 0 0 0 1)
+    (gl:clear :color-buffer)
+    (render-inventory-for-picking)
+    (let ((c (1- (elt (gl:read-pixels x (- *display-height* y) 1 1
+                                      :rgba :unsigned-byte)
+                      0))))
+      (when (not (minusp c))
+        (let ((item (nth c (items *inventory*))))
+          ;; action here
+          (when item
+            (setf (selected *inventory*)
+                  (if (equal (selected *inventory*) item)
+                      nil
+                      item)))))))
   (gl:scissor 0 0 *display-width* *display-height*)
   (gl:disable :scissor-test))
 
@@ -112,6 +127,7 @@
         (gl:clear-color 0 0 0 1)
         (gl:clear :color-buffer)
         
+        (setf *inventory* (make-instance 'inventory))
         (make-scene)
 
         (sdl2:with-event-loop (:method :poll)

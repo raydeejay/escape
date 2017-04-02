@@ -12,7 +12,8 @@
    (visible  :accessor visible  :initarg :visible  :initform T)
    (filename :accessor filename :initarg :filename)
    (texture  :accessor texture  :initarg :texture)
-   (on-click :accessor on-click :initarg :on-click :initform nil)))
+   (on-click :accessor on-click :initarg :on-click :initform nil)
+   (selected :accessor selected :initarg :selected :initform nil)))
 
 (defmethod initialize-instance :around ((sprite sprite)
                                         &rest initargs)
@@ -34,7 +35,9 @@
         (ilut:renderer :opengl)
         (let ((img (il:gen-image)))
           (il:with-bound-image img
-            (il:load-image filename)
+            (let ((data (load-resource filename)))
+              (cffi:with-foreign-array (ptr data `(:array :unsigned-char ,(length data)))
+                (il:load-l :unknown ptr (length data))))
             (il:convert-image :rgba :unsigned-byte)
             (gl:tex-image-2d :texture-2d 0 :rgba
                              (il:image-width)
@@ -60,16 +63,23 @@
 ;;     (setf *sprites* (append *sprites* (list sprite)))
 ;;     (setf *sprite* sprite)))
 
-(defun new ()
-  (init-sprite))
+;; (defun new ()
+;;   (init-sprite))
 
-(defun clone ()
-  (let ((trt *sprite*))
-    (init-sprite)
-    (apply 'ink (color trt))
-    (setf (x *sprite*) (x trt)
-          (y *sprite*) (y trt)
-          (heading *sprite*) (heading trt))))
+(defun make-sprite (id name filename &rest args)
+  (apply 'make-instance 'sprite
+         :id id
+         :name name
+         :filename filename
+         args))
+
+;; (defun clone ()
+;;   (let ((trt *sprite*))
+;;     (init-sprite)
+;;     (apply 'ink (color trt))
+;;     (setf (x *sprite*) (x trt)
+;;           (y *sprite*) (y trt)
+;;           (heading *sprite*) (heading trt))))
 
 (defmethod draw ((sprite sprite))
   (when (visible sprite)
@@ -108,10 +118,6 @@
         (gl:vertex (+ (x sprite) width) (y sprite)))
       (gl:bind-texture :texture-2d 0)
       (gl:disable :texture-2d :blend))))
-
-(defun draw-sprites ()
-  (loop :for sprite :in (sprites *scene*) :do
-     (draw sprite)))
 
 (defun render-sprites-for-picking ()
   (loop :for sprite :in (sprites *scene*)
