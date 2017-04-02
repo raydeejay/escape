@@ -2,7 +2,7 @@
 
 (in-package #:escape)
 
-;; helper
+;; utility functions
 (defun <- (key plist)
   (assoc-value (plist-alist plist) key :test 'equal))
 
