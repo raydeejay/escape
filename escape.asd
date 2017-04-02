@@ -19,7 +19,6 @@
   :components ((:file "package")
                (:file "utils")
                (:file "vfs")
-               (:file "textures")
                (:file "sprites")
                (:file "inventory")
                (:file "scene")
