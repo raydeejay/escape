@@ -18,6 +18,7 @@
                #:smalltalk-block-syntax)
   :components ((:file "package")
                (:file "utils")
+               (:file "api")
                (:file "vfs")
                (:file "sprites")
                (:file "inventory")
