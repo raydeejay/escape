@@ -11,54 +11,64 @@
 (defclass inventory ()
   ((items      :accessor items      :initarg :items      :initform nil)
    (background :accessor background :initarg :background :initform nil)
-   (selected   :accessor selected   :initarg :selected   :initform nil)))
+   (selected   :accessor selected   :initarg :selected   :initform nil))
+  (:documentation "Represents the inventory."))
 
-(defun draw-inventory ()
-  (draw (background *inventory*))
-  (loop :for item :in (items *inventory*) :do
-     (if (equal (selected *inventory*) item)
-         (progn (setf (texture item) (list (car (texture item)) *selected-size* *selected-size*))
-                (draw item)
-                (setf (texture item) (list (car (texture item)) *unselected-size* *unselected-size*)))
-         (draw item))))
-
-(defun coords-for-position (n)
-  (let ((x (+ 5 *inventory-x* (* 50 (mod n 2))))
-        (y (+ 10 (* 60 (truncate (/ n 2))))))
-    (values x y)))
-
-(defmethod reorder ((inv inventory))
-  (loop :for item :in (items inv)
-     :for n :by 1 :doing
-     (multiple-value-bind (x y)
-         (coords-for-position n)
-       (setf (x item) x
-             (y item) y
-             (texture item) (list (car (texture item))
-                                  *unselected-size*
-                                  *unselected-size*)))))
+(defmethod @ ((inv inventory) (symbol symbol))
+    (find symbol (items inv) :key 'id :test 'equal))
 
 (defmethod add ((inv inventory) (sprite sprite))
+  "Add an item to the inventory. It is reordered afterwards."
   (setf (items inv) (append (items inv) (list sprite)))
   (reorder inv))
 
 (defmethod discard ((inv inventory) (symbol symbol))
-  "Extracts an object from an inventory and returns it."
+  "Extracts an object from an inventory and returns it. The inventory
+is reordered afterwards."
   (let ((removed (find symbol (items inv) :key 'id :test 'equal)))
     (setf (items inv) (remove removed (items inv)))
     (reorder inv)
     removed))
 
+(defmethod draw ((inventory inventory))
+  "Draw the inventory on screen."
+  (draw (background inventory))
+  (loop :for item :in (items inventory) :do
+     (if (equal (selected inventory) item)
+         (progn (setf (texture item) (list (car (texture item)) *selected-size* *selected-size*))
+                (draw item)
+                (setf (texture item) (list (car (texture item)) *unselected-size* *unselected-size*)))
+         (draw item))))
+
+
+(defmethod reorder ((inv inventory))
+  "Sets the coordinates of each item in the inventory to the ones that
+correspond to its place in the list."
+  (labels ((coords-for-position (n)
+             "Returns ;TODO: he coordinates for the nth item in the inventory."
+             (let ((x (+ 5 *inventory-x* (* 50 (mod n 2))))
+                   (y (+ 10 (* 60 (truncate (/ n 2))))))
+               (values x y))))
+    (loop :for item :in (items inv)
+       :for n :by 1 :doing
+       (multiple-value-bind (x y)
+           (coords-for-position n)
+         (setf (x item) x
+               (y item) y
+               (texture item) (list (car (texture item))
+                                    *unselected-size*
+                                    *unselected-size*))))))
+
 (defmethod select ((inv inventory) (sprite sprite))
   (setf (selected inv) sprite))
+
 
 (defun selectedp (key)
   (and (selected *inventory*)
        (equal (selected *inventory*)
               (@ *inventory* key))))
 
-(defmethod @ ((inv inventory) (symbol symbol))
-    (find symbol (items inv) :key 'id :test 'equal))
+
 
 (defun render-inventory-for-picking ()
   (loop :for item :in (items *inventory*)

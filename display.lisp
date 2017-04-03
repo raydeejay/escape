@@ -44,8 +44,8 @@
   (declare (ignore win))
   (gl:clear-color 0 0 0 1)
   (gl:clear :color-buffer)
-  (draw-scene)
-  (draw-inventory))
+  (draw *scene*)
+  (draw *inventory*))
 
 
 (defun handle-keydown (keysym)
@@ -55,7 +55,7 @@
     (declare (ignore scancode sym mod-value))
     ;; (cond
     ;;   ((sdl2:scancode= scancode :scancode-r)
-    ;;    (make-scene)))
+    ;;    (build-world)))
     ))
 
 (defun handle-keyup (keysym)
@@ -68,7 +68,7 @@
            (setf *display-fullscreen* (not *display-fullscreen*)))
 
           ((sdl2:scancode= scancode :scancode-r)
-           (make-scene))
+           (build-world))
 
           ((sdl2:scancode= (sdl2:scancode-value keysym)
                            :scancode-escape)
@@ -128,7 +128,7 @@
         (gl:clear :color-buffer)
         
         (setf *inventory* (make-instance 'inventory))
-        (make-scene)
+        (build-world)
 
         (sdl2:with-event-loop (:method :poll)
           (:quit () t)
